@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Ekstraksi Fitur Warna & Segmentasi Citra HSV</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 2a10 10 0 0 1 10 10"></path>
+                        <circle cx="12" cy="12" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <span class="logo-title">EKSTRAKSI FITUR WARNA</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" data-target="dashboard">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span>Dashboard Utama</span>
+                </a>
+                <a href="#ekstraksi" class="nav-item" data-target="ekstraksi">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                        <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                    </svg>
+                    <span>Ekstraksi Fitur Warna</span>
+                </a>
+                <a href="#hsv-komponen" class="nav-item" data-target="hsv-komponen">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="4" y1="9" x2="20" y2="9"></line>
+                        <line x1="4" y1="15" x2="20" y2="15"></line>
+                        <line x1="10" y1="3" x2="8" y2="21"></line>
+                        <line x1="16" y1="3" x2="14" y2="21"></line>
+                    </svg>
+                    <span>Komponen H, S, V</span>
+                </a>
+                <a href="#segmentasi" class="nav-item" data-target="segmentasi">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                    <span>Segmentasi Warna</span>
+                </a>
+                <a href="#hasil" class="nav-item" data-target="hasil">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <span>Hasil & Analisis</span>
+                </a>
+            </nav>
+
+            
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="main-wrapper">
+            <!-- HEADER -->
+            <header class="app-header">
+                <div class="header-content">
+                    <div>
+                        <h1 class="header-title">Aplikasi Ekstraksi Fitur Warna dan Segmentasi Citra Digital</h1>
+                    </div>
+                    <div class="header-status">
+                        <span id="systemStatusBadge" class="status-pill status-ready">
+                            <span class="status-indicator"></span>
+                            <span id="systemStatusText">Siap Menerima Gambar</span>
+                        </span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- MAIN CONTAINER -->
+            <main class="content-container">
+                <!-- NOTIFICATION ALERT BOX -->
+                <div id="alertBox" class="alert-box d-none" role="alert">
+                    <span id="alertMessage">Pesan sistem</span>
+                    <button type="button" class="alert-close" onclick="hideAlert()" aria-label="Tutup alert">&times;</button>
+                </div>
+
+                <!-- SECTION 1: DASHBOARD & UPLOAD AREA -->
+                <section id="dashboard" class="content-section">
+                    <div class="section-header-row">
+                        <div>
+                            <h2 class="section-title">1. Unggah Gambar Digital</h2>
+                            <p class="section-desc">Pilih berkas citra digital berformat JPG, JPEG, atau PNG, atau gunakan salah satu gambar sampel praktikum.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid-2-cols">
+                        <!-- UPLOAD CARD -->
+                        <div class="card upload-card">
+                            <div class="card-header">
+                                <h3 class="card-title">Pilih / Unggah Berkas</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="uploadForm">
+                                    <div class="dropzone" id="dropzone">
+                                        <div class="dropzone-icon">
+                                            <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                <polyline points="17 8 12 3 7 8"></polyline>
+                                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                                            </svg>
+                                        </div>
+                                        <p class="dropzone-text">Tarik & lepas file gambar ke sini, atau</p>
+                                        <label for="imageInput" class="btn btn-primary btn-sm">
+                                            <span>Pilih File dari Komputer</span>
+                                            <input type="file" id="imageInput" name="image" accept=".jpg,.jpeg,.png" class="visually-hidden">
+                                        </label>
+                                        <p class="dropzone-help">Mendukung format JPG, JPEG, dan PNG (Maks. 16 MB)</p>
+                                    </div>
+                                </form>
+
+                                <!-- SAMPLE IMAGES SELECTOR -->
+                                <div class="samples-container">
+                                    <span class="samples-label">Atau gunakan citra contoh siap uji:</span>
+                                    <div class="samples-buttons">
+                                        {% for sample in samples %}
+                                        <button type="button" class="btn btn-outline btn-sample" data-sample="{{ sample.id }}">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                                <polyline points="21 15 16 10 5 21"></polyline>
+                                            </svg>
+                                            <span>{{ sample.title }}</span>
+                                        </button>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- IMAGE PREVIEW & SUMMARY CARD -->
+                        <div class="card preview-card">
+                            <div class="card-header d-flex-between">
+                                <h3 class="card-title">Preview Citra Asli</h3>
+                                <button type="button" id="btnChangeImage" class="btn btn-outline btn-sm d-none" onclick="triggerNewUpload()">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                                    </svg>
+                                    <span>Ganti Gambar</span>
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="preview-box">
+                                    <img id="originalPreviewImage" src="" alt="Pratinjau Citra Asli" class="d-none">
+                                    <div id="previewPlaceholder" class="preview-placeholder">
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                            <polyline points="21 15 16 10 5 21"></polyline>
+                                        </svg>
+                                        <p>Belum ada citra yang dimuat.<br>Silakan unggah gambar atau pilih citra sampel.</p>
+                                    </div>
+                                </div>
+
+                                <!-- IMAGE METADATA DETAILS -->
+                                <div id="imageMetadataBox" class="meta-grid d-none">
+                                    <div class="meta-item">
+                                        <span class="meta-label">Nama File</span>
+                                        <span class="meta-value" id="metaFilename">-</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="meta-label">Dimensi (L × T)</span>
+                                        <span class="meta-value" id="metaDimensions">-</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="meta-label">Total Piksel</span>
+                                        <span class="meta-value" id="metaTotalPixels">-</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="meta-label">Kanal Citra</span>
+                                        <span class="meta-value" id="metaChannels">3 (RGB / BGR)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2: EKSTRAKSI FITUR WARNA (RGB & HSV) -->
+                <section id="ekstraksi" class="content-section">
+                    <div class="section-header-row">
+                        <div>
+                            <h2 class="section-title">2. Ekstraksi Fitur Warna</h2>
+                            <p class="section-desc">Nilai rata-rata dan deviasi komponen warna dihitung secara langsung dari seluruh piksel citra digital menggunakan NumPy.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid-2-cols">
+                        <!-- STATISTIK RGB -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-badge bg-blue-subtle">Ruang Warna RGB</div>
+                                <h3 class="card-title">Rata-Rata Komponen Red, Green, Blue</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="stats-list">
+                                    <!-- RED STAT -->
+                                    <div class="stat-row">
+                                        <div class="stat-info">
+                                            <span class="stat-dot dot-red"></span>
+                                            <span class="stat-name">Red (Rata-rata)</span>
+                                        </div>
+                                        <span class="stat-num font-mono" id="meanRed">-</span>
+                                        <div class="stat-progress-bg">
+                                            <div class="stat-progress-bar bar-red" id="barRed" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                    <!-- GREEN STAT -->
+                                    <div class="stat-row">
+                                        <div class="stat-info">
+                                            <span class="stat-dot dot-green"></span>
+                                            <span class="stat-name">Green (Rata-rata)</span>
+                                        </div>
+                                        <span class="stat-num font-mono" id="meanGreen">-</span>
+                                        <div class="stat-progress-bg">
+                                            <div class="stat-progress-bar bar-green" id="barGreen" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                    <!-- BLUE STAT -->
+                                    <div class="stat-row">
+                                        <div class="stat-info">
+                                            <span class="stat-dot dot-blue"></span>
+                                            <span class="stat-name">Blue (Rata-rata)</span>
+                                        </div>
+                                        <span class="stat-num font-mono" id="meanBlue">-</span>
+                                        <div class="stat-progress-bg">
+                                            <div class="stat-progress-bar bar-blue" id="barBlue" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="card-note">Rentang nilai RGB adalah 0 hingga 255 pada format 8-bit per kanal.</p>
+                            </div>
+                        </div>
+
+                        <!-- STATISTIK HSV -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-badge bg-burgundy-subtle">Ruang Warna HSV</div>
+                                <h3 class="card-title">Rata-Rata Komponen Hue, Saturation, Value</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="stats-list">
+                                    <!-- HUE STAT -->
+                                    <div class="stat-row">
+                                        <div class="stat-info">
+                                            <span class="stat-dot dot-hue"></span>
+                                            <span class="stat-name">Hue (Corak Warna)</span>
+                                        </div>
+                                        <span class="stat-num font-mono" id="meanHue">-</span>
+                                        <div class="stat-progress-bg">
+                                            <div class="stat-progress-bar bar-hue" id="barHue" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                    <!-- SATURATION STAT -->
+                                    <div class="stat-row">
+                                        <div class="stat-info">
+                                            <span class="stat-dot dot-sat"></span>
+                                            <span class="stat-name">Saturation (Kejenuhan)</span>
+                                        </div>
+                                        <span class="stat-num font-mono" id="meanSat">-</span>
+                                        <div class="stat-progress-bg">
+                                            <div class="stat-progress-bar bar-sat" id="barSat" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                    <!-- VALUE STAT -->
+                                    <div class="stat-row">
+                                        <div class="stat-info">
+                                            <span class="stat-dot dot-val"></span>
+                                            <span class="stat-name">Value (Kecerahan)</span>
+                                        </div>
+                                        <span class="stat-num font-mono" id="meanVal">-</span>
+                                        <div class="stat-progress-bg">
+                                            <div class="stat-progress-bar bar-val" id="barVal" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="card-note">Skala OpenCV: Hue (0–179), Saturation (0–255), Value (0–255).</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3: VISUALISASI KOMPONEN HSV -->
+                <section id="hsv-komponen" class="content-section">
+                    <div class="section-header-row">
+                        <div>
+                            <h2 class="section-title">3. Visualisasi Komponen Ruang Warna HSV</h2>
+                            <p class="section-desc">Pemisahan kanal Hue, Saturation, dan Value setelah konversi dari ruang warna RGB menggunakan fungsi <code>cv2.cvtColor(img, cv2.COLOR_BGR2HSV)</code>.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid-3-cols">
+                        <!-- HUE COMPONENT -->
+                        <div class="card channel-card">
+                            <div class="card-header">
+                                <h3 class="card-title">Komponen Hue (H)</h3>
+                                <span class="badge-tag">Corak Warna</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="image-viewer-frame">
+                                    <img id="imgComponentHue" src="" alt="Komponen Hue Grayscale" class="d-none">
+                                    <div class="viewer-placeholder" id="placeholderHue">Memuat citra...</div>
+                                </div>
+                                <p class="component-explanation">
+                                    Menyatakan sudut warna pada lingkaran spektrum warna. Nilai piksel mewakili jenis corak warna (merah, hijau, biru, dsb).
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- SATURATION COMPONENT -->
+                        <div class="card channel-card">
+                            <div class="card-header">
+                                <h3 class="card-title">Komponen Saturation (S)</h3>
+                                <span class="badge-tag">Kejenuhan</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="image-viewer-frame">
+                                    <img id="imgComponentSat" src="" alt="Komponen Saturation Grayscale" class="d-none">
+                                    <div class="viewer-placeholder" id="placeholderSat">Memuat citra...</div>
+                                </div>
+                                <p class="component-explanation">
+                                    Menyatakan tingkat kemurnian atau kepekatan warna. Area yang lebih terang menunjukkan warna yang semakin jenuh/murni.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- VALUE COMPONENT -->
+                        <div class="card channel-card">
+                            <div class="card-header">
+                                <h3 class="card-title">Komponen Value (V)</h3>
+                                <span class="badge-tag">Kecerahan</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="image-viewer-frame">
+                                    <img id="imgComponentVal" src="" alt="Komponen Value Grayscale" class="d-none">
+                                    <div class="viewer-placeholder" id="placeholderVal">Memuat citra...</div>
+                                </div>
+                                <p class="component-explanation">
+                                    Menyatakan tingkat intensitas cahaya atau kecerahan. Area yang lebih terang memiliki pencahayaan lebih kuat.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 4: SEGMENTASI WARNA & SLIDER HSV -->
+                <section id="segmentasi" class="content-section">
+                    <div class="section-header-row">
+                        <div>
+                            <h2 class="section-title">4. Segmentasi Warna Berbasis HSV</h2>
+                            <p class="section-desc">Pilih salah satu dari 9 kelompok warna atau sesuaikan ambang batas (threshold) HSV secara interaktif.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid-2-cols">
+                        <!-- 9 COLOR PRESETS SELECTOR -->
+                        <div class="card">
+                            <div class="card-header d-flex-between">
+                                <h3 class="card-title">Pilihan 9 Kelompok Warna</h3>
+                                <span class="badge-tag bg-blue-subtle" id="activePresetBadge">Pilihan: Merah</span>
+                            </div>
+                            <div class="card-body">
+                                <p class="preset-instruction">Klik salah satu kelompok warna untuk memicu segmentasi otomatis pada citra:</p>
+                                <div class="preset-grid">
+                                    {% for key, preset in presets.items() %}
+                                    <button type="button" 
+                                            class="preset-btn {% if key == 'merah' %}active{% endif %}" 
+                                            data-color="{{ key }}" 
+                                            data-name="{{ preset.name }}">
+                                        <span class="color-swatch" style="background-color: {{ preset.hex }};"></span>
+                                        <span class="color-title">{{ preset.name }}</span>
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                <div class="preset-desc-box" id="presetDescBox">
+                                    <strong>Keterangan Warna Terpilih:</strong>
+                                    <p id="presetDescriptionText">Hue berada di awal dan akhir spektrum lingkaran (0-10 & 170-179).</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- HSV MANUAL THRESHOLD SLIDERS -->
+                        <div class="card">
+                            <div class="card-header d-flex-between">
+                                <h3 class="card-title">Pengaturan Ambang Batas (Threshold) HSV</h3>
+                                <button type="button" id="btnResetThreshold" class="btn btn-outline btn-xs" title="Kembalikan slider ke pengaturan default preset aktif">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="1 4 1 10 7 10"></polyline>
+                                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                                    </svg>
+                                    <span>Reset Threshold</span>
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <!-- HUE MIN / MAX -->
+                                <div class="slider-group">
+                                    <div class="slider-labels">
+                                        <span class="slider-title">Hue (H) Rentang [0 - 179]</span>
+                                        <span class="slider-range-val font-mono"><span id="valHMin">0</span> - <span id="valHMax">10</span></span>
+                                    </div>
+                                    <div class="slider-inputs-row">
+                                        <div class="slider-col">
+                                            <label for="sliderHMin">H Min:</label>
+                                            <input type="range" id="sliderHMin" min="0" max="179" value="0" class="range-slider">
+                                        </div>
+                                        <div class="slider-col">
+                                            <label for="sliderHMax">H Max:</label>
+                                            <input type="range" id="sliderHMax" min="0" max="179" value="10" class="range-slider">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- SATURATION MIN / MAX -->
+                                <div class="slider-group">
+                                    <div class="slider-labels">
+                                        <span class="slider-title">Saturation (S) Rentang [0 - 255]</span>
+                                        <span class="slider-range-val font-mono"><span id="valSMin">70</span> - <span id="valSMax">255</span></span>
+                                    </div>
+                                    <div class="slider-inputs-row">
+                                        <div class="slider-col">
+                                            <label for="sliderSMin">S Min:</label>
+                                            <input type="range" id="sliderSMin" min="0" max="255" value="70" class="range-slider">
+                                        </div>
+                                        <div class="slider-col">
+                                            <label for="sliderSMax">S Max:</label>
+                                            <input type="range" id="sliderSMax" min="0" max="255" value="255" class="range-slider">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- VALUE MIN / MAX -->
+                                <div class="slider-group">
+                                    <div class="slider-labels">
+                                        <span class="slider-title">Value (V) Rentang [0 - 255]</span>
+                                        <span class="slider-range-val font-mono"><span id="valVMin">50</span> - <span id="valVMax">255</span></span>
+                                    </div>
+                                    <div class="slider-inputs-row">
+                                        <div class="slider-col">
+                                            <label for="sliderVMin">V Min:</label>
+                                            <input type="range" id="sliderVMin" min="0" max="255" value="50" class="range-slider">
+                                        </div>
+                                        <div class="slider-col">
+                                            <label for="sliderVMax">V Max:</label>
+                                            <input type="range" id="sliderVMax" min="0" max="255" value="255" class="range-slider">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="slider-hint">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                    </svg>
+                                    <span>Jika H Min &gt; H Max (seperti warna merah), sistem otomatis menggabungkan dua rentang spektrum secara melingkar (wrap-around).</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 5: VISUALISASI HASIL & ANALISIS -->
+                <section id="hasil" class="content-section">
+                    <div class="section-header-row">
+                        <div>
+                            <h2 class="section-title">5. Visualisasi Hasil Pengolahan & Analisis</h2>
+                            <p class="section-desc">Hasil segmentasi warna citra digital ditampilkan dalam 4 visualisasi perbandingan lengkap beserta metrik kuantitatif deteksi piksel.</p>
+                        </div>
+                    </div>
+
+                    <!-- 4 QUADRANT VISUALIZATION -->
+                    <div class="grid-2-cols mb-4">
+                        <!-- 1. GAMBAR ASLI -->
+                        <div class="card">
+                            <div class="card-header d-flex-between">
+                                <h3 class="card-title">1. Citra Asli (Original Image)</h3>
+                                <span class="badge-tag">Format Asli</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="image-viewer-frame">
+                                    <img id="resultOriginalImage" src="" alt="Citra Asli" class="d-none">
+                                    <div class="viewer-placeholder" id="placeholderOriginal">Unggah citra terlebih dahulu</div>
+                                </div>
+                                <p class="card-caption">Citra digital sebelum dilakukan pengolahan dan segmentasi.</p>
+                            </div>
+                        </div>
+
+                        <!-- 2. KOMPONEN HSV TERPILIH / GABUNGAN -->
+                        <div class="card">
+                            <div class="card-header d-flex-between">
+                                <h3 class="card-title">2. Komponen Hue Citra</h3>
+                                <span class="badge-tag">Ruang HSV</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="image-viewer-frame">
+                                    <img id="resultHueOverview" src="" alt="Representasi Kanal Hue" class="d-none">
+                                    <div class="viewer-placeholder" id="placeholderHueOverview">Belum ada citra</div>
+                                </div>
+                                <p class="card-caption">Distribusi corak warna citra pada kanal Hue (dinormalisasi 0-255).</p>
+                            </div>
+                        </div>
+
+                        <!-- 3. MASK SEGMENTASI -->
+                        <div class="card">
+                            <div class="card-header d-flex-between">
+                                <h3 class="card-title">3. Mask Segmentasi (Binary Mask)</h3>
+                                <span class="badge-tag bg-blue-subtle">cv2.inRange()</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="image-viewer-frame">
+                                    <img id="resultMaskImage" src="" alt="Mask Segmentasi Hitam Putih" class="d-none">
+                                    <div class="viewer-placeholder" id="placeholderMask">Menunggu proses...</div>
+                                </div>
+                                <p class="card-caption">Citra biner: putih (255) adalah piksel warna terpilih, hitam (0) adalah latar belakang.</p>
+                            </div>
+                        </div>
+
+                        <!-- 4. HASIL SEGMENTASI -->
+                        <div class="card">
+                            <div class="card-header d-flex-between">
+                                <h3 class="card-title">4. Hasil Segmentasi (Segmented Image)</h3>
+                                <span class="badge-tag bg-burgundy-subtle">cv2.bitwise_and()</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="image-viewer-frame">
+                                    <img id="resultSegmentedImage" src="" alt="Hasil Segmentasi Warna" class="d-none">
+                                    <div class="viewer-placeholder" id="placeholderSegmented">Menunggu proses...</div>
+                                </div>
+                                <p class="card-caption">Citra yang hanya mempertahankan piksel dengan corak warna terpilih.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ANALISIS STATISTIK & DOWNLOAD BUTTONS -->
+                    <div class="card analysis-card">
+                        <div class="card-header d-flex-between">
+                            <div>
+                                <h3 class="card-title">Laporan Analisis Kuantitatif Segmentasi</h3>
+                                <p class="card-subtitle">Perhitungan jumlah dan rasio piksel warna berdasarkan citra biner secara nyata.</p>
+                            </div>
+                            <div class="download-actions">
+                                <button type="button" id="btnDownloadSegmented" class="btn btn-primary btn-sm" disabled>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                    <span>Unduh Hasil Segmentasi (PNG)</span>
+                                </button>
+                                <button type="button" id="btnDownloadMask" class="btn btn-outline btn-sm" disabled>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                    <span>Unduh Mask Biner (PNG)</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="analysis-grid">
+                                <div class="analysis-box">
+                                    <span class="analysis-label">Citra yang Diproses</span>
+                                    <span class="analysis-val font-mono" id="statImageName">-</span>
+                                </div>
+                                <div class="analysis-box">
+                                    <span class="analysis-label">Dimensi Citra</span>
+                                    <span class="analysis-val font-mono" id="statDimensions">-</span>
+                                </div>
+                                <div class="analysis-box">
+                                    <span class="analysis-label">Total Piksel Citra</span>
+                                    <span class="analysis-val font-mono" id="statTotalPixels">-</span>
+                                </div>
+                                <div class="analysis-box">
+                                    <span class="analysis-label">Warna yang Dideteksi</span>
+                                    <span class="analysis-val font-bold text-primary" id="statActiveColor">-</span>
+                                </div>
+                                <div class="analysis-box">
+                                    <span class="analysis-label">Piksel Terdeteksi</span>
+                                    <span class="analysis-val font-mono text-success" id="statDetectedPixels">-</span>
+                                </div>
+                                <div class="analysis-box highlight-box">
+                                    <span class="analysis-label">Persentase Deteksi</span>
+                                    <span class="analysis-val font-mono text-burgundy" id="statPercentage">-</span>
+                                </div>
+                            </div>
+
+                            <!-- PERCENTAGE PROGRESS BAR -->
+                            <div class="detection-meter-container">
+                                <div class="detection-meter-header">
+                                    <span>Rasio Piksel Terdeteksi terhadap Seluruh Citra:</span>
+                                    <span class="font-mono font-bold" id="detectionMeterText">0.00%</span>
+                                </div>
+                                <div class="meter-bar-bg">
+                                    <div class="meter-bar-fill" id="detectionMeterFill" style="width: 0%"></div>
+                                </div>
+                                <div class="formula-box">
+                                    <code>Rumus: Persentase = (Jumlah Piksel Terdeteksi / Total Seluruh Piksel) &times; 100%</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+
+    <!-- JAVASCRIPT APP LOGIC -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
