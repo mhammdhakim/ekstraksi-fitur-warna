@@ -91,50 +91,8 @@ color_segmentation/
 │   └── results/                # Direktori luaran mask biner dan citra tersegmentasi
 └── templates/
     └── index.html              # Antarmuka web utama
-```
 
----
-
-## 6. Panduan Instalasi dan Menjalankan Aplikasi di Windows 11
-
-### Langkah 1: Persiapan Terminal
-Buka terminal **PowerShell** atau **Command Prompt**, lalu masuk ke direktori proyek:
-```powershell
-cd "d:\KULIAH\SEMESTER 5\NLP\extrasi warna"
-```
-
-### Langkah 2: Buat & Aktifkan Virtual Environment (Opsional namun Dianjurkan)
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-
-### Langkah 3: Instalasi Dependensi
-Jalankan perintah instalasi berikut:
-```powershell
-pip install -r requirements.txt
-```
-
-### Langkah 4: Menjalankan Aplikasi
-Mulai server Flask dengan perintah:
-```powershell
-python app.py
-```
-
-Setelah server aktif, terminal akan menampilkan:
-```text
-Memulai server Aplikasi Ekstraksi Fitur Warna & Segmentasi HSV...
- * Running on http://127.0.0.1:5000
-```
-
-Buka peramban (*web browser*) seperti Google Chrome, Microsoft Edge, atau Mozilla Firefox, lalu akses:
-```text
-http://127.0.0.1:5000
-```
-
----
-
-## 7. Panduan Penggunaan Aplikasi
+## 6. Panduan Penggunaan Aplikasi
 
 1. **Memuat Citra:**
    - Unggah berkas gambar pribadi (JPG, JPEG, atau PNG) melalui area *drag-and-drop* atau klik tombol **"Pilih File dari Komputer"**.
@@ -160,7 +118,7 @@ http://127.0.0.1:5000
 
 ---
 
-## 8. Menjalankan Pengujian Otomatis
+## 7. Menjalankan Pengujian Otomatis
 
 Aplikasi telah dilengkapi dengan berkas pengujian otomatis untuk memverifikasi 20 skenario fungsional:
 ```powershell
